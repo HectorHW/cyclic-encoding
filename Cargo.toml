@@ -1,0 +1,17 @@
+[package]
+name = "poly"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+colored = "2.0"
+algebraics = "0.3.0"
+rand = "0.8.5"
+encoding_rs = "0.8.31"
+itertools = "0.10.5"
+num = "0.4"
+
+[features]
+verbose = []
