@@ -142,6 +142,33 @@ fn syndrome<const N: usize, const N_K: usize>(data: &BitVector<N>, base: &Pol) -
     into_bitvector(div_mod2(into_polynomial(data), base).1)
 }
 
+#[cfg(feature = "compute-distance")]
+fn distance<const N: usize>(v1: &BitVector<N>, v2: &BitVector<N>) -> usize {
+    v1.iter().zip(v2.iter()).filter(|(x, y)| x != y).count()
+}
+
+#[cfg(feature = "compute-distance")]
+fn compute_distance(g: &Pol) -> (usize, BitVector<8>, BitVector<8>) {
+    let mut min_distance = 13;
+    let mut examples = (None, None);
+
+    for w1 in 0..255u8 {
+        for w2 in 0..w1 {
+            let (w1, w2) = (BitVector::from(w1), BitVector::from(w2));
+            let (c1, c2) = (
+                encode::<13, 8>(w1.clone(), g),
+                encode::<13, 8>(w2.clone(), g),
+            );
+            if distance(&c1, &c2) < min_distance {
+                min_distance = distance(&c1, &c2);
+                let _ = examples.0.replace(w1);
+                examples.1.replace(w2);
+            }
+        }
+    }
+    (min_distance, examples.0.unwrap(), examples.1.unwrap())
+}
+
 fn main() {
     // 5 вариант - x^5 + x^4 + x^3 + x + 1
 
@@ -181,5 +208,18 @@ fn main() {
             with_highlight(&with_bit_broken, &[idx]),
             s
         );
+    }
+
+    #[cfg(feature = "compute-distance")]
+    {
+        let (dist, w1, w2) = compute_distance(&g);
+        let (c1, c2) = (
+            encode::<13, 8>(w1.clone(), &g),
+            encode::<13, 8>(w2.clone(), &g),
+        );
+        println!(
+            "min distance: {} for codes: {} and {}\nThese words correspond to {} and {}",
+            dist, c1, c2, w1, w2
+        )
     }
 }
